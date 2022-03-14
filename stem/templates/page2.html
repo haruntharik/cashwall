@@ -9,7 +9,7 @@
     <h1>Transaction page</h1><br>
 
   <div class="login">
-  <form id="login"  method="get" action="login.php">
+  <form id="start"  method="POST" action="/start">
   <h2>id:</h2>
   <h3>NOTE: your id is your password</h3>
   <label>
@@ -22,7 +22,7 @@
 </label><br>
 <input type="int" name="amount" id="amount" placeholder="RS.">
 <br><br>
-<input type="button" name="subm" id="subm" value="submit">
+<input type="Submit" name="subm" id="subm" value="submit">
 <br><br>
 <a href="{{url_for('route3')}}">see full transaction details</a>
 
