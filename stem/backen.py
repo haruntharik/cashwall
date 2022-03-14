@@ -8,6 +8,10 @@ def my_form():
 def login():
     if request.method =='POST' and request.form['uname']=='admin' and request.form['pass']=='admin123':
         return  render_template('page2.html')
+@app.route('/start',methods = ['POST','GET'])
+def start():
+    if request.method =='POST':
+        return render_template('page3.html')
 
 @app.route('/route/')
 def route1():
