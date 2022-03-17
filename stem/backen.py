@@ -17,7 +17,7 @@ def login():
     username = request.form['uname']
     global username
     password = request.form['pass']
-    cursor.execute("SELECT * FROM users WHERE name='" + username + "' AND password=" + password + "")
+    cursor.execute("SELECT * FROM users WHERE name='" + username + "' AND password='" + password + "'")
     data = cursor.fetchone()
     if data is None:
 
@@ -31,9 +31,10 @@ def start():
     if request.method == 'POST':
         amount = request.form['amount']
         amount_ch=int(amount)
+        cursor=db.cursor(buffered=True)
         cursor.execute("SELECT balance FROM users WHERE name='" + username + "'")
-        balance = cursor.fetchone()
-        balance_ch=int(balance[0])
+        balance = cursor.fetchone()[0]
+        balance_ch=int(balance or 0)
         c=balance_ch-amount_ch
         trans_method = request.form['transaction']
         trans_method_ch=str(trans_method)
@@ -45,8 +46,8 @@ def start():
         else:
             if trans_method_ch == debit:
                 cursor.execute("SELECT balance FROM users WHERE name='" + username + "'")
-                balance = cursor.fetchone()
-                balance_ch = int(balance[0])
+                balance = cursor.fetchone()[0]
+                balance_ch = int(balance or 0)
                 after= balance_ch - amount_ch
                 after_ch=str(after)
                 cursor.execute("UPDATE users SET balance='" + after_ch + "' WHERE name='" + username + "'")
@@ -54,8 +55,8 @@ def start():
                 return render_template('page4.html')
             else:
                 cursor.execute("SELECT balance FROM users WHERE name='" + username + "'")
-                balance = cursor.fetchone()
-                balance_ch = int(balance[0])
+                balance = cursor.fetchone()[0]
+                balance_ch = int(balance or 0)
                 after = balance_ch + amount_ch
                 after_ch = str(after)
                 cursor.execute("UPDATE users SET balance='" + after_ch + "' WHERE name='" + username + "'")
@@ -84,7 +85,10 @@ def route2():
 
 @app.route('/route3/')
 def route3():
-    return render_template(('table.html'))
+    headings =("Name","ROLE","Salary")
+    data=({"rolf","software engineer","800000"})
+
+    return render_template('table.html',headings=headings,data=data)
 
 
 @app.route('/signup', methods=['POST', 'GET'])
