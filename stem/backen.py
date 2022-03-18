@@ -1,5 +1,6 @@
 from flask import Flask, redirect, render_template, request, session, abort
 import mysql.connector
+from datetime import datetime
 
 db = mysql.connector.connect(host="localhost", user="root", passwd="///Tharik321", database="wallet")
 cursor = db.cursor()
@@ -12,11 +13,13 @@ def my_form():
     return render_template('login.html')
 
 
+
 @app.route('/login', methods=['POST', 'GET'])
 def login():
     username = request.form['uname']
     global username
     password = request.form['pass']
+
     cursor.execute("SELECT * FROM users WHERE name='" + username + "' AND password='" + password + "'")
     data = cursor.fetchone()
     if data is None:
@@ -27,7 +30,21 @@ def login():
 
 
 @app.route('/start', methods=['POST', 'GET'])
+
+
 def start():
+    cursor = db.cursor(buffered=True)
+    cursor.execute("SELECT walletid FROM users WHERE name='" + username + "'")
+    wallid = cursor.fetchone()[0]
+    wallid = str(wallid)
+    global wallid
+    date = None
+    date=datetime.today()
+    time = None
+    time=datetime.now()
+
+
+
     if request.method == 'POST':
         amount = request.form['amount']
         amount_ch=int(amount)
@@ -52,6 +69,10 @@ def start():
                 after_ch=str(after)
                 cursor.execute("UPDATE users SET balance='" + after_ch + "' WHERE name='" + username + "'")
                 db.commit()
+
+                cursor.execute("INSERT INTO transde (walletid,data,time,transactionmode,amount,balance)VALUES(%s,%s,%s,%s,%s,%s)",
+                       [wallid, date, time, debit,amount_ch,after_ch])
+                db.commit()
                 return render_template('page4.html')
             else:
                 cursor.execute("SELECT balance FROM users WHERE name='" + username + "'")
@@ -60,6 +81,10 @@ def start():
                 after = balance_ch + amount_ch
                 after_ch = str(after)
                 cursor.execute("UPDATE users SET balance='" + after_ch + "' WHERE name='" + username + "'")
+                db.commit()
+
+                cursor.execute("INSERT INTO transde (walletid,data,time,transactionmode,amount,balance)VALUES(%s,%s,%s,%s,%s,%s)",
+                    [wallid, date, time, credit,amount_ch, after_ch])
                 db.commit()
 
 
@@ -85,10 +110,14 @@ def route2():
 
 @app.route('/route3/')
 def route3():
-    headings =("Name","ROLE","Salary")
-    data=({"rolf","software engineer","800000"})
+    i
+        cursor.execute("SELECT * FROM transde WHERE walletid='" + wallid + "'")
+        headings = ("walletid", "Date", "Time", "Transaction mode", "Amount", "current balance")
+        data = {}
 
-    return render_template('table.html',headings=headings,data=data)
+        return render_template('table.html', headings=headings, data=data)
+
+
 
 
 @app.route('/signup', methods=['POST', 'GET'])
@@ -102,6 +131,7 @@ def signup():
 
         cursor.execute("INSERT INTO users (name,password,walletid,balance) VALUES(%s,%s,%s,%s)",
                        [name, password, walletid, balance])
+
 
         db.commit()
         return render_template('page2.html')
