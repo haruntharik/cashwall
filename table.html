@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>HOME</title>
+  <link rel='stylesheet' href="{{url_for('static',filename='table.css')}}">
+  </head>
+<body>
+  <table class ="table" border="5">
+  <tr class="table__header">
+  <tr>
+    {% for header in headings %}
+    <th>{{header}}</th>
+    {% endfor %}
+   </tr> 	
+   {% for row in data %}
+   <tr>
+   {% for cell in row %}
+   <td>{{ cell }}</td>
+   {% endfor %}
+   </tr>
+   {% endfor %}
+   
+   </table>
+  
+  
+
+<input type="button" name="down" id="down" value="Download">
+<br><br>
+<a href='{{url_for('route1')}}'>back to Transaction page</a>
+
+
+</form>
+</div>
+</body>
+</html>

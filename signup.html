@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>sign up</title>
+  <link rel='stylesheet' href="{{url_for('static',filename='color2.css')}}">
+  </head>
+<body>
+  
+   
+  <div class="login">
+  <form id="/signup"  method="POST" action="/signup">
+  <label>
+  <h1>sign up here</h1><br>
+  <label><b>User Name:</b>
+</label>
+<input type="text" name="usern" id="usern" placeholder="name">
+<br><br>
+ <label><b>Password:</b>
+</label>
+<input type="text" name="passw" id="passw" placeholder="only 6 characters">
+<br><br>
+ <label><b>New wallet id:</b>
+</label>
+<input type="text" name="wallid" id="wallid" placeholder="only 8 characters">
+<br><br>
+<label><b>Initial balance</b>
+</label>
+<input type="text" name="balance" id="balance" placeholder="RS.">
+<br><br>
+
+<input type="Submit" name="newall" id="newall" value="Create account">
+<br><br>
+
+
+</form>
+</div>
+</body>
+</html>
