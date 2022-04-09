@@ -185,5 +185,5 @@ def signup():
 
 
 
-app.run()
-cursor.close()
+
+
