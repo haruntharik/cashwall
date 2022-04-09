@@ -1,12 +1,22 @@
 from flask import Flask, redirect, render_template, request, session, abort
-import mysql.connector
+from sqlalchemy import MetaData,create_engine,Table,Column,Integer,String,select
 from datetime import datetime
-import pandas as pd
 
-db = mysql.connector.connect(host="localhost", user="root", passwd="///Tharik321", database="wallet")
-cursor = db.cursor()
-
+meta_data= MetaData()
 app = Flask(__name__)
+
+db_connection="postgresql://postgres:tharik@localhost:8080/wallet"
+
+users = Table('users',meta_data,
+              Column('name',String(80)),
+              Column('walletid',String(80)),
+              Column('password',String(80)),
+              Column('balance',Integer()),
+              )
+
+
+engine = create_engine(db_connection)
+conn = engine.connect()
 
 
 @app.route('/',)
@@ -19,10 +29,16 @@ def my_form():
 def login():
     username = request.form['uname']
     global username
-    password = request.form['pass']
+    password= request.form['pass']
 
-    cursor.execute("SELECT * FROM users WHERE name='" + username + "' AND password='" + password + "'")
-    data = cursor.fetchone()
+    #result =select(users).where(users.name==username,users.password==password)
+    #data=conn.execute(result)
+    result=conn.execute("SELECT * FROM users WHERE name='" + username + "' AND password='" + password + "'")
+    data =result.fetchone()
+
+
+
+
     if data is None:
 
         return render_template('login.html')
@@ -30,18 +46,18 @@ def login():
         return render_template('page2.html')
 
 
+
+
+
+
 @app.route('/start', methods=['POST', 'GET'])
 
 
-
-
-
-
 def start():
-    cursor=db.cursor(buffered=True)
-    cursor.execute("SELECT walletid FROM users WHERE name='" + username + "'")
+    #cursor=db.cursor(buffered=True)
+    result=conn.execute("SELECT walletid FROM users WHERE name='" + username + "'")
 
-    wallid = cursor.fetchone()[0]
+    wallid = result.fetchone()[0]
 
 
 
@@ -54,15 +70,15 @@ def start():
 
 
     if request.method == 'POST':
-        cursor = db.cursor(buffered=True)
+        #cursor = db.cursor(buffered=True)
 
 
         amount = request.form['amount']
         amount_ch = float(amount)
         format(amount_ch, '.4f')
 
-        cursor.execute("SELECT balance FROM users WHERE name='" + username + "'")
-        balance = cursor.fetchone()[0]
+        result= conn.execute("SELECT balance FROM users WHERE name='" + username + "'")
+        balance = result.fetchone()[0]
         balance_ch=float(balance or 0)
 
 
@@ -76,33 +92,33 @@ def start():
             return render_template('page3.html')
         else:
             if trans_method_ch == debit:
-                cursor.execute("SELECT balance FROM users WHERE name='" + username + "'")
-                balance = cursor.fetchone()[0]
+                result=conn.execute("SELECT balance FROM users WHERE name='" + username + "'")
+                balance = result.fetchone()[0]
                 balance_ch = float(balance or 0)
                 format(balance_ch, '.4f')
                 after= balance_ch - amount_ch
                 format(after, '.4f')
                 after_ch=str(after)
-                cursor.execute("UPDATE users SET balance='" + after_ch + "' WHERE name='" + username + "'")
-                db.commit()
+                conn.execute("UPDATE users SET balance='" + after_ch + "' WHERE name='" + username + "'")
 
-                cursor.execute("INSERT INTO transde (walletid,data,time,transactionmode,amount,balance)VALUES(%s,%s,%s,%s,%s,%s)",
+
+                conn.execute("INSERT INTO transde (walletid,data,time,transactionmode,amount,balance)VALUES(%s,%s,%s,%s,%s,%s)",
                        [wallid, date, time, debit,amount_ch,after_ch])
-                db.commit()
+
                 return render_template('page4.html')
             else:
-                cursor.execute("SELECT balance FROM users WHERE name='" + username + "'")
-                balance = cursor.fetchone()[0]
+                result=conn.execute("SELECT balance FROM users WHERE name='" + username + "'")
+                balance = result.fetchone()[0]
                 balance_ch = float(balance or 0)
                 after = balance_ch + amount_ch
                 format(after, '.4f' )
                 after_ch = str(after)
-                cursor.execute("UPDATE users SET balance='" + after_ch + "' WHERE name='" + username + "'")
-                db.commit()
+                conn.execute("UPDATE users SET balance='" + after_ch + "' WHERE name='" + username + "'")
 
-                cursor.execute("INSERT INTO transde (walletid,data,time,transactionmode,amount,balance)VALUES(%s,%s,%s,%s,%s,%s)",
+
+                conn.execute("INSERT INTO transde (walletid,data,time,transactionmode,amount,balance)VALUES(%s,%s,%s,%s,%s,%s)",
                     [wallid, date, time, credit,amount_ch, after_ch])
-                db.commit()
+
 
 
                 return render_template('page4.html')
@@ -123,26 +139,23 @@ def route2():
 @app.route('/route3/',methods=['POST','GET'])
 def route3():
     if request.method == 'POST':
-        cursor = db.cursor(buffered=True)
-        cursor.execute("SELECT walletid FROM users WHERE name='" + username + "'")
+       # cursor = db.cursor(buffered=True)
+        result=conn.execute("SELECT walletid FROM users WHERE name='" + username + "'")
 
-        wallid = cursor.fetchone()[0]
-        cursor.execute("SELECT * FROM transde WHERE walletid='" + wallid + "'")
-
-        data = cursor.fetchall()
-        df = pd.read_sql(data)
-
-        df.to_csv(r'C:\Users\my\Downloads\exported_data.csv')
-
-    cursor = db.cursor(buffered=True)
-    cursor.execute("SELECT walletid FROM users WHERE name='" + username + "'")
-
-    wallid = cursor.fetchone()[0]
+        wallid = result.fetchone()[0]
+        conn.execute("SELECT * FROM transde WHERE walletid='" + wallid + "'")
 
 
-    cursor.execute("SELECT * FROM transde WHERE walletid='" + wallid +"'")
+
+    #cursor = db.cursor(buffered=True)
+    result=conn.execute("SELECT walletid FROM users WHERE name='" + username + "'")
+
+    wallid = result.fetchone()[0]
+
+
+    result=conn.execute("SELECT * FROM transde WHERE walletid='" + wallid +"'")
     headings = ("walletid", "Date", "Time", "Transaction mode", "Amount", "current balance")
-    data = cursor.fetchall()
+    data = result.fetchall()
     return render_template('table.html', headings=headings, data=data)
 
 
@@ -162,12 +175,14 @@ def signup():
         walletid = details['wallid']
         balance = details['balance']
 
-        cursor.execute("INSERT INTO users (name,password,walletid,balance) VALUES(%s,%s,%s,%s)",
-                       [name, password, walletid, balance])
+        conn.execute(users.insert(), name=name,password=password,walletid=walletid,balance=balance)
 
 
-        db.commit()
+
+
         return "You were successully created new account goback to login again"
+
+
 
 
 app.run()
