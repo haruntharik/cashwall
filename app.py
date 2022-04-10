@@ -5,7 +5,7 @@ from datetime import datetime
 meta_data= MetaData()
 app = Flask(__name__)
 
-db_connection="postgresql://postgres:tharik@localhost:8080/wallet"
+db_connection="postgres://ecwwvulyvbibsm:2737c91e60320a8599b9f8a910fb13334b0bb9caf6f290a99c5a66b9376ab879@ec2-34-207-12-160.compute-1.amazonaws.com:5432/d4m54k1v5ld5cbt"
 
 users = Table('users',meta_data,
               Column('name',String(80)),
