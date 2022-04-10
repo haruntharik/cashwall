@@ -27,8 +27,9 @@ def my_form():
 
 @app.route('/login', methods=['POST', 'GET'])
 def login():
-    username = request.form['uname']
     global username
+    username = request.form['uname']
+    
     password= request.form['pass']
 
     #result =select(users).where(users.name==username,users.password==password)
