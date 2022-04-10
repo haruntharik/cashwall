@@ -7,7 +7,7 @@ pipreqs==0.4.11
 requests==2.27.1
 urllib3==1.26.9
 yarg==0.1.9
-Flask==0.10.1
+Flask==2.0.3
 Flask-SQLAlchemy==2.1
 Flask-WTF==0.12
 SQLAlchemy==1.0.11
